@@ -84,6 +84,28 @@ int main(){
     }
 
 
+    std::vector<size_t> IndexSort(SpwOrdMat.size());
+    std::iota(IndexSort.begin(),IndexSort.end(), 0;
+    std::sort(IndexSort.begin(),IndexSort.end(),[&](int L, int R){
+        double LM = std::accumulate(SpwOrdMat[L].begin(),SpwOrdMat[L].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        double RM = std::accumulate(SpwOrdMat[R].begin(),SpwOrdMat[R].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return LM < RM; 
+    });
+
+    std::vector< std::pair<size_t, double> > PosScr(IndexSort.size());
+
+    std::transform(IndexSort.begin(), IndexSort.end(), PosScr.begin(), [&SpwOrdMat](size_t & Idx){
+        double Scr = std::accumulate(SpwOrdMat[Idx].begin(),SpwOrdMat[Idx].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return std::make_pair(std::move(Idx),Scr);
+    });
+    return PosScr;
+
     // std::sort(SpwOrdMat.begin(), SpwOrdMat.end(),[](std::vector< std::pair<int,int> > & RowA, std::vector< std::pair<int,int> > & RowB){
     //     return
     //     //std::accumulate(RowA.begin(),RowA.end(),0,[](int A, std::pair<int,int> & B){
@@ -132,20 +154,4 @@ int main(){
     // for(auto & Val : RowScr){
     //     std::cout << "HardVal: " << Val.first << " | SoftVal: " << Val.second << std::endl;
     // }
-
-
-
-    std::vector<size_t> IndexSort(SpwOrdMat.size());
-    std::iota(IndexSort.begin(),IndexSort.end(), 0);
-    std::sort(IndexSort.begin(),IndexSort.end(),[&](int L, int R){
-        double LM = std::accumulate(SpwOrdMat[L].begin(),SpwOrdMat[L].end(),0.0,[](double A, std::pair<int,int> & B){
-            return A + (B.first/(double)B.second);
-        });
-        double RM = std::accumulate(SpwOrdMat[R].begin(),SpwOrdMat[R].end(),0.0,[](double A, std::pair<int,int> & B){
-            return A + (B.first/(double)B.second);
-        });
-        return LM < RM; 
-    });
-
-
 }
