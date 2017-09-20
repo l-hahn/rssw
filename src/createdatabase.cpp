@@ -488,10 +488,16 @@ std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & Spw
     std::iota(IndexSort.begin(),IndexSort.end(), 0);
     std::sort(IndexSort.begin(),IndexSort.end(),[&](int L, int R){
         double LM = std::accumulate(SpwOrdMat[L].begin(),SpwOrdMat[L].end(),0.0,[](double A, std::pair<int,int> & B){
-            return A + (B.first/(double)B.second);
+            if(B.second > 0){
+                return A + (B.first/(double)B.second);    
+            }
+            return A;
         });
         double RM = std::accumulate(SpwOrdMat[R].begin(),SpwOrdMat[R].end(),0.0,[](double A, std::pair<int,int> & B){
-            return A + (B.first/(double)B.second);
+            if(B.second > 0){
+                return A + (B.first/(double)B.second);    
+            }
+            return A;
         });
         return LM < RM; 
     });
@@ -500,9 +506,12 @@ std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & Spw
 
     std::transform(IndexSort.begin(), IndexSort.end(), PosScr.begin(), [&SpwOrdMat](size_t & Idx){
         double Scr = std::accumulate(SpwOrdMat[Idx].begin(),SpwOrdMat[Idx].end(),0.0,[](double A, std::pair<int,int> & B){
-            return A + (B.first/(double)B.second);
+            if(B.second > 0){
+                return A + (B.first/(double)B.second);    
+            }
+            return A;
         });
-        return std::make_pair(std::move(Idx),Scr);
+        return std::make_pair(std::move(Idx),(Scr/IndexSort.size()));
     });
 
     std::sort(SpwVec.begin(), SpwVec.end(), [](const spacedword & SpwA, const spacedword & SpwB){

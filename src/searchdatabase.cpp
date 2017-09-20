@@ -339,7 +339,7 @@ std::vector<spacedhit> pattern_hit(sequence_family & Family, unsigned FamID, rsw
                             Pos += 1;
                         }
                         //double NewScore = FamScore.score();
-                        double NewScore = 
+                        double NewScore = FamScore.pos_scr();
                         LocalSwMatches.push_back(spacedhit(FamScore.position(), SpwMin->sequence(), 0, FamScore.id(), Pos, NewScore));
                     }
                     SpwMin++;
