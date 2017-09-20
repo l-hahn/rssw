@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <numeric>
+#include <functional>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -59,13 +61,12 @@ int main(){
         }
     }
 
+    //***********************************************************//
+
     std::vector< std::vector< std::pair<int,int> > > SpwOrdMat(SpwID.size(), std::vector< std::pair<int,int> >(SpwID.size(), std::pair<int,int>(0,0)));
     std::cout << "MatSize: " << SpwID.size() << "x" << SpwID.size() << std::endl;
     std::sort(SpwVec.begin(),SpwVec.end(),[](spacedword & SpwA, spacedword & SpwB){
         if(SpwA.sequence() == SpwB.sequence()){
-            if(SpwA.position() == SpwB.position()){
-                return SpwA < SpwB;
-            }
             return SpwA.position() < SpwB.position();
         }
         return SpwA.sequence() < SpwB.sequence();
@@ -82,28 +83,69 @@ int main(){
     
     }
 
-    std::sort(SpwOrdMat.begin(), SpwOrdMat.end(),[](std::vector< std::pair<int,int> > & RowA, std::vector< std::pair<int,int> > & RowB){
-        return
-        std::accumulate(RowA.begin(),RowA.end(),0,[](int A, std::pair<int,int> & B){
-            if(B.first > 0){
-                return A + 1;
-            }
-            return A - 1;
-        })
-        <
-        std::accumulate(RowB.begin(),RowB.end(),0,[](int A, std::pair<int,int> & B){
-            if(B.first > 0){
-                return A + 1;
-            }
-            return A - 1;
+
+    // std::sort(SpwOrdMat.begin(), SpwOrdMat.end(),[](std::vector< std::pair<int,int> > & RowA, std::vector< std::pair<int,int> > & RowB){
+    //     return
+    //     //std::accumulate(RowA.begin(),RowA.end(),0,[](int A, std::pair<int,int> & B){
+    //     std::accumulate(RowA.begin(),RowA.end(),0.0,[](double A, std::pair<int,int> & B){
+    //         // if(B.first > 0){
+    //         //     return A + 1;
+    //         // }
+    //         // return A - 1;
+    //         return A + (B.first/(double)B.second);
+    //     })
+    //     <
+    //     //std::accumulate(RowB.begin(),RowB.end(),0,[](int A, std::pair<int,int> & B){
+    //     std::accumulate(RowB.begin(),RowB.end(),0.0,[](double A, std::pair<int,int> & B){
+    //         // if(B.first > 0){
+    //         //     return A + 1;
+    //         // }
+    //         // return A - 1;
+    //         return A + (B.first/(double)B.second);
+    //     });
+    // });
+    // for(auto & Val : SpwOrdMat[0]){
+    //     std::cout << "[" << (Val.first/(double)Val.second) << "] ";
+    // }
+    // std::cout << "\n####\n" << std::endl;
+    // for(unsigned i = 0; i < SpwOrdMat.size(); i++){
+    //     for(unsigned j = 0; j < SpwOrdMat.size(); j++){
+    //         //std::cout << "[" << SpwOrdMat[i][j].first << "," << SpwOrdMat[i][j].second << "] ";
+    //         std::cout << "[" << (SpwOrdMat[i][j].first/(double)SpwOrdMat[i][j].second) << "] ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::vector< std::pair<int,double> > RowScr(SpwOrdMat.size());
+    // std::transform(SpwOrdMat.begin(),SpwOrdMat.end(),RowScr.begin(),[](std::vector< std::pair<int,int> > & RowSpwScr){
+    //     int HardVal = std::accumulate(RowSpwScr.begin(),RowSpwScr.end(),0,[](int A, std::pair<int,int> & B){
+    //         if(B.first >= 0){
+    //             return A + 1;
+    //         }
+    //         return A - 1;
+    //     });
+    //     double SoftVal = std::accumulate(RowSpwScr.begin(),RowSpwScr.end(),0.0,[](double A, std::pair<int,int> & B){
+    //         return A + (B.first/(double)B.second);
+    //     });
+    //     return std::make_pair(HardVal,SoftVal);
+    // });
+    // std::cout << std::endl;
+    // for(auto & Val : RowScr){
+    //     std::cout << "HardVal: " << Val.first << " | SoftVal: " << Val.second << std::endl;
+    // }
+
+
+
+    std::vector<size_t> IndexSort(SpwOrdMat.size());
+    std::iota(IndexSort.begin(),IndexSort.end(), 0);
+    std::sort(IndexSort.begin(),IndexSort.end(),[&](int L, int R){
+        double LM = std::accumulate(SpwOrdMat[L].begin(),SpwOrdMat[L].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
         });
+        double RM = std::accumulate(SpwOrdMat[R].begin(),SpwOrdMat[R].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return LM < RM; 
     });
 
-    for(unsigned i = 0; i < SpwOrdMat.size(); i++){
-        for(unsigned j = 0; j < SpwOrdMat.size(); j++){
-            //std::cout << "[" << SpwOrdMat[i][j].first << "," << SpwOrdMat[i][j].second << "] ";
-            std::cout << "[" << (SpwOrdMat[i][j].first/(double)SpwOrdMat[i][j].second) << "] ";
-        }
-        std::cout << std::endl;
-    }
+
 }
