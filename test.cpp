@@ -50,6 +50,7 @@ int main(){
     }
     SpwVec.resize(std::distance(SpwVec.begin(),CutOff));
 
+    //***********************************************************//
 
     std::unordered_map<uint64_t,size_t> SpwID;
     Ctr = 0;
@@ -61,7 +62,6 @@ int main(){
         }
     }
 
-    //***********************************************************//
 
     std::vector< std::vector< std::pair<int,int> > > SpwOrdMat(SpwID.size(), std::vector< std::pair<int,int> >(SpwID.size(), std::pair<int,int>(0,0)));
     std::cout << "MatSize: " << SpwID.size() << "x" << SpwID.size() << std::endl;
@@ -104,7 +104,6 @@ int main(){
         });
         return std::make_pair(std::move(Idx),Scr);
     });
-    return PosScr;
 
     // std::sort(SpwOrdMat.begin(), SpwOrdMat.end(),[](std::vector< std::pair<int,int> > & RowA, std::vector< std::pair<int,int> > & RowB){
     //     return
@@ -154,4 +153,58 @@ int main(){
     // for(auto & Val : RowScr){
     //     std::cout << "HardVal: " << Val.first << " | SoftVal: " << Val.second << std::endl;
     // }
+}
+
+std::vector< std::pair<size_t, double> > SpwOrder(std::vector<spacedword> & SpwVec){
+    std::unordered_map<uint64_t,size_t> SpwID;
+    Ctr = 0;
+    Start = SpwVec.begin();
+    for(auto SpwIt = SpwVec.begin(); SpwIt != SpwVec.end(); SpwIt++){
+        if(*SpwIt != *Start || (SpwIt+1) == SpwVec.end()){
+            SpwID.insert(std::make_pair(Start->bits(),Ctr++));
+            Start = SpwIt;
+        }
+    }
+
+    std::vector< std::vector< std::pair<int,int> > > SpwOrdMat(SpwID.size(), std::vector< std::pair<int,int> >(SpwID.size(), std::pair<int,int>(0,0)));
+    std::sort(SpwVec.begin(),SpwVec.end(),[](spacedword & SpwA, spacedword & SpwB){
+        if(SpwA.sequence() == SpwB.sequence()){
+            return SpwA.position() < SpwB.position();
+        }
+        return SpwA.sequence() < SpwB.sequence();
+    });
+
+    Start = SpwVec.begin();
+    for(auto SpwItS = SpwVec.begin(); SpwItS != SpwVec.end()-1; SpwItS++){
+        for(auto SpwItE = SpwItS+1; SpwItE != SpwVec.end(); SpwItE++){
+            SpwOrdMat[SpwID[SpwItS->bits()]][SpwID[SpwItE->bits()]].first++;
+            SpwOrdMat[SpwID[SpwItS->bits()]][SpwID[SpwItE->bits()]].second++;
+            SpwOrdMat[SpwID[SpwItE->bits()]][SpwID[SpwItS->bits()]].first--;
+            SpwOrdMat[SpwID[SpwItE->bits()]][SpwID[SpwItS->bits()]].second++;
+        }
+    
+    }
+
+
+    std::vector<size_t> IndexSort(SpwOrdMat.size());
+    std::iota(IndexSort.begin(),IndexSort.end(), 0);
+    std::sort(IndexSort.begin(),IndexSort.end(),[&](int L, int R){
+        double LM = std::accumulate(SpwOrdMat[L].begin(),SpwOrdMat[L].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        double RM = std::accumulate(SpwOrdMat[R].begin(),SpwOrdMat[R].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return LM < RM; 
+    });
+
+    std::vector< std::pair<size_t, double> > PosScr(IndexSort.size());
+
+    std::transform(IndexSort.begin(), IndexSort.end(), PosScr.begin(), [&SpwOrdMat](size_t & Idx){
+        double Scr = std::accumulate(SpwOrdMat[Idx].begin(),SpwOrdMat[Idx].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return std::make_pair(std::move(Idx),Scr);
+    });
+    return PosScr;
 }

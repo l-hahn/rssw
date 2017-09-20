@@ -10,13 +10,13 @@
 class rep_spw{
 	public:
 		rep_spw(int64_t BitSpacedWord);
-		rep_spw(int64_t BitSpacedWord, unsigned Family, unsigned Position, double FamilyScore);
+		rep_spw(int64_t BitSpacedWord, unsigned Family, unsigned Position, double FamilyScore, double PosScr);
 		rep_spw(int64_t BitSpacedWord, family_score & FamilyScore);
 
 		int64_t bits() const;
 		size_t size() const;
 		void clear();
-		void push_back(unsigned Family, unsigned Position, double Score);
+		void push_back(unsigned Family, unsigned Position, double Score,double PosScr);
 		void push_back(family_score & FamilyScore);
 
 		family_score operator[](size_t Idx) const;

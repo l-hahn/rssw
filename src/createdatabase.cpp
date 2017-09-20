@@ -193,8 +193,6 @@ void create_words(std::vector< std::vector<spacedword> > & FamilySpacedWords, st
             if(FamilyVec[i].size() >= dboptions::FamilyOffset){
                 for(unsigned j = 0; j < FamilyVec[i].size(); j++){
                     std::vector<spacedword> FamilyWords = FamilyVec[i][j].spaced_words(Pat, j, i);
-                    std::sort(FamilyWords.begin(), FamilyWords.end());
-                    FamilyWords.erase(std::unique(FamilyWords.begin(), FamilyWords.end()), FamilyWords.end());
                     FamilySpacedWords[i].insert(FamilySpacedWords[i].end(), FamilyWords.begin(), FamilyWords.end());
                     if(FamilyVec[i][j].size() >= Pat.length()){
                         FamilySize[i]++;
@@ -419,40 +417,32 @@ void extract_family_rssw(std::vector< std::vector<spacedword> > & FamilySpacedWo
             if(SpacedBuckets.size() > 0){
                 MaxWordCover = SpacedBuckets[0].family();
             }
+
+            std::vector< std::pair<size_t, double> > SpwOrder = spw_order(SpacedBuckets);
+
             if(dboptions::Greedy == true){
                 bool NewSeq = false;
                 auto BucketBegin = SpacedBuckets.begin();
-                double MeanPos = 0;
+                unsigned PosCtr = 0;
                 for(auto BucketIter = BucketBegin; BucketIter != SpacedBuckets.end(); BucketIter++){
                     if((*BucketIter != *BucketBegin || (BucketIter+1) == SpacedBuckets.end()) && NewSeq == true){
-                        LocalRswSet.push_back(rep_spw(BucketBegin->bits(), i, BucketBegin->family(), MeanPos/BucketBegin->family())); //Family := BucketSize
-                        MeanPos = 0;
+                        LocalRswSet.push_back(rep_spw(BucketBegin->bits(), i, SpwOrder[PosCtr].first, BucketBegin->family()/MaxWordCover,SpwOrder[PosCtr].second)); //Family := BucketSize
                         BucketBegin = BucketIter;
                         NewSeq = false;
+                        PosCtr++;
                     }
                     if(FamSeqCover[BucketIter->sequence()] < dboptions::WordPerSeq){
                         NewSeq = true;
                     }
                     FamSeqCover[BucketIter->sequence()]++;
-                    MeanPos += (double)BucketIter->position()/ FamilyVec[i][BucketIter->sequence()].size();
                 }
                 if(NewSeq && BucketBegin != SpacedBuckets.end()){
-                    LocalRswSet.push_back(rep_spw(BucketBegin->bits(), i, BucketBegin->family(), MeanPos/BucketBegin->family())); //Family := BucketSize
-                }
-                std::sort(LocalRswSet.begin(), LocalRswSet.end(), [](const rep_spw & SpwA, const rep_spw & SpwB){
-                    return SpwA[0].score() < SpwB[0].score();
-                });
-
-                for(size_t j = 0; j < LocalRswSet.size(); j++){
-                    // family_score Tmp(LocalRswSet[j][0].id(), j, (double)LocalRswSet[j][0].position()/MaxWordCover);
-                    // LocalRswSet[j].clear();
-                    // LocalRswSet[j].push_back(Tmp);
-                    LocalRswSet[j][0] = family_score(LocalRswSet[j][0].id(), j, (double)LocalRswSet[j][0].position()/MaxWordCover);
+                    LocalRswSet.push_back(rep_spw(BucketBegin->bits(), i, SpwOrder[PosCtr].first, BucketBegin->family()/MaxWordCover,SpwOrder[PosCtr].second)); //Family := BucketSize
                 }
                 RswSet.merge(LocalRswSet);
             }
             else{
-
+                //TODO: NOT GREEDY!!
             }
         }
         #pragma omp critical
@@ -461,6 +451,68 @@ void extract_family_rssw(std::vector< std::vector<spacedword> > & FamilySpacedWo
         }
     }
     std::cout << "\r\t[OK] Extracting representativ spaced words" << std::endl;
+}
+
+std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & SpwVec){
+    std::unordered_map<uint64_t,size_t> SpwID;
+    Ctr = 0;
+    Start = SpwVec.begin();
+    for(auto SpwIt = SpwVec.begin(); SpwIt != SpwVec.end(); SpwIt++){
+        if(*SpwIt != *Start || (SpwIt+1) == SpwVec.end()){
+            SpwID.insert(std::make_pair(Start->bits(),Ctr++));
+            Start = SpwIt;
+        }
+    }
+
+    std::vector< std::vector< std::pair<int,int> > > SpwOrdMat(SpwID.size(), std::vector< std::pair<int,int> >(SpwID.size(), std::pair<int,int>(0,0)));
+    std::sort(SpwVec.begin(),SpwVec.end(),[](spacedword & SpwA, spacedword & SpwB){
+        if(SpwA.sequence() == SpwB.sequence()){
+            return SpwA.position() < SpwB.position();
+        }
+        return SpwA.sequence() < SpwB.sequence();
+    });
+
+    Start = SpwVec.begin();
+    for(auto SpwItS = SpwVec.begin(); SpwItS != SpwVec.end()-1; SpwItS++){
+        for(auto SpwItE = SpwItS+1; SpwItE != SpwVec.end(); SpwItE++){
+            SpwOrdMat[SpwID[SpwItS->bits()]][SpwID[SpwItE->bits()]].first++;
+            SpwOrdMat[SpwID[SpwItS->bits()]][SpwID[SpwItE->bits()]].second++;
+            SpwOrdMat[SpwID[SpwItE->bits()]][SpwID[SpwItS->bits()]].first--;
+            SpwOrdMat[SpwID[SpwItE->bits()]][SpwID[SpwItS->bits()]].second++;
+        }
+    
+    }
+
+
+    std::vector<size_t> IndexSort(SpwOrdMat.size());
+    std::iota(IndexSort.begin(),IndexSort.end(), 0);
+    std::sort(IndexSort.begin(),IndexSort.end(),[&](int L, int R){
+        double LM = std::accumulate(SpwOrdMat[L].begin(),SpwOrdMat[L].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        double RM = std::accumulate(SpwOrdMat[R].begin(),SpwOrdMat[R].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return LM < RM; 
+    });
+
+    std::vector< std::pair<size_t, double> > PosScr(IndexSort.size());
+
+    std::transform(IndexSort.begin(), IndexSort.end(), PosScr.begin(), [&SpwOrdMat](size_t & Idx){
+        double Scr = std::accumulate(SpwOrdMat[Idx].begin(),SpwOrdMat[Idx].end(),0.0,[](double A, std::pair<int,int> & B){
+            return A + (B.first/(double)B.second);
+        });
+        return std::make_pair(std::move(Idx),Scr);
+    });
+
+    std::sort(SpwVec.begin(), SpwVec.end(), [](const spacedword & SpwA, const spacedword & SpwB){
+        if(SpwA.family() == SpwB.family()){ //Family := BucketSize
+            return SpwA < SpwB;
+        }
+        return SpwA.family() > SpwB.family();
+    });
+
+    return PosScr;
 }
 
 

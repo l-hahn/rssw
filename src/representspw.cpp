@@ -3,8 +3,8 @@
 rep_spw::rep_spw(int64_t BitSpacedWord):_BitSpacedWord(BitSpacedWord){	
 }
 
-rep_spw::rep_spw(int64_t BitSpacedWord, unsigned Family, unsigned Position, double FamilyScore):_BitSpacedWord(BitSpacedWord){
-	push_back(Family, Position, FamilyScore);	
+rep_spw::rep_spw(int64_t BitSpacedWord, unsigned Family, unsigned Position, double FamilyScore, double PosScr):_BitSpacedWord(BitSpacedWord){
+	push_back(Family, Position, FamilyScore, PosScr);	
 }
 
 rep_spw::rep_spw(int64_t BitSpacedWord, family_score & FamilyScore):_BitSpacedWord(BitSpacedWord){
@@ -24,8 +24,8 @@ void rep_spw::clear(){
 	_Family.clear();
 }
 
-void rep_spw::push_back(unsigned Family, unsigned Position, double FamilyScore){
-	_Family.push_back(family_score(Family, Position, FamilyScore));
+void rep_spw::push_back(unsigned Family, unsigned Position, double FamilyScore, double PosScr){
+	_Family.push_back(family_score(Family, Position, FamilyScore, PosScr));
 }
 
 void rep_spw::push_back(family_score & FamilyScore){

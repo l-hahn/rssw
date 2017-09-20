@@ -36,6 +36,8 @@ void family_unique(std::vector< std::vector<spacedword> > & SpacedHashVector, st
 void create_not_unique_spw(std::vector< std::vector<spacedword> > & FamilySpacedWords);
 void extract_family_rssw(std::vector< std::vector<spacedword> > & FamilySpacedWords, std::vector<sequence_family> & FamilyVec, rsw_set & RSSW_SPW);
 
+std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & SpwVec)
+
 void clean_line();
 void init_omp();
 

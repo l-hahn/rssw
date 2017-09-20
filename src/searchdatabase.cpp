@@ -294,7 +294,6 @@ std::vector<spacedhit> pattern_hit(sequence_family & Family, unsigned FamID, rsw
         std::vector<spacedword> TmpSw;
         TmpSw = Family[i].spaced_words(Pat, i);
         if(TmpSw.size() > 0){
-            TmpSw.erase(std::unique(TmpSw.begin(), TmpSw.end()), TmpSw.end());
             SpacedWords.insert(SpacedWords.end(), TmpSw.begin(), TmpSw.end());
             Ctr++;
         }
@@ -339,7 +338,9 @@ std::vector<spacedhit> pattern_hit(sequence_family & Family, unsigned FamID, rsw
                             Pos *= 3; //Protein -> DNA retranslation for positions, if origin was DNA!
                             Pos += 1;
                         }
-                        LocalSwMatches.push_back(spacedhit(FamScore.position(), SpwMin->sequence(), 0, FamScore.id(), Pos, FamScore.score()));
+                        //double NewScore = FamScore.score();
+                        double NewScore = 
+                        LocalSwMatches.push_back(spacedhit(FamScore.position(), SpwMin->sequence(), 0, FamScore.id(), Pos, NewScore));
                     }
                     SpwMin++;
                 }
