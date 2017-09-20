@@ -455,8 +455,8 @@ void extract_family_rssw(std::vector< std::vector<spacedword> > & FamilySpacedWo
 
 std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & SpwVec){
     std::unordered_map<uint64_t,size_t> SpwID;
-    Ctr = 0;
-    Start = SpwVec.begin();
+    size_t Ctr = 0;
+    auto Start = SpwVec.begin();
     for(auto SpwIt = SpwVec.begin(); SpwIt != SpwVec.end(); SpwIt++){
         if(*SpwIt != *Start || (SpwIt+1) == SpwVec.end()){
             SpwID.insert(std::make_pair(Start->bits(),Ctr++));
@@ -511,7 +511,7 @@ std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & Spw
             }
             return A;
         });
-        return std::make_pair(std::move(Idx),(Scr/IndexSort.size()));
+        return std::make_pair(std::move(Idx),(Scr/SpwOrdMat.size()));
     });
 
     std::sort(SpwVec.begin(), SpwVec.end(), [](const spacedword & SpwA, const spacedword & SpwB){

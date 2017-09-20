@@ -143,7 +143,7 @@ void spacedword_db::to_file(std::string & FileName, bool AlphaReduction){
         for(auto & SpwFam : PatSpw){
             Output << "<" << spacedword(SpwFam.bits(),0).to_string() << ">" << std::endl;
             for(auto & Fam : SpwFam){
-                Output << id_fam_name(Fam.id()) << "\t" << Fam.score() << "\t" << Fam.position() << std::endl;
+                Output << id_fam_name(Fam.id()) << "\t" << Fam.score() << "\t" << Fam.position() << "\t" << Fam.pos_scr() << std::endl;
             }
         }
     }
@@ -221,10 +221,10 @@ void spacedword_db::from_file(std::string & FileName){
                         else{
                             add_family_id(Parser, ID);
                         }
-                        double Score;
+                        double Score, PosRelScr;
                         unsigned Position;
-                        Input >> Score >> Position;
-                        TmpSpwFam[TmpSpwFam.size()-1].push_back(ID, Position, Score);
+                        Input >> Score >> Position >> PosRelScr;
+                        TmpSpwFam[TmpSpwFam.size()-1].push_back(ID, Position, Score, PosRelScr);
                 }
                 Parser.clear();
             }

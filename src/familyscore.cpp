@@ -1,6 +1,6 @@
 #include "familyscore.hpp"
 
-family_score::family_score(unsigned ID, unsigned Position, double Score, double RelScr): _ID(ID), _Position(Position), _Score(Score), _PosRelScr(RelScore){
+family_score::family_score(unsigned ID, unsigned Position, double Score, double RelScr): _ID(ID), _Position(Position), _Score(Score), _PosRelScr(RelScr){
 }
 
 unsigned family_score::id() const{
