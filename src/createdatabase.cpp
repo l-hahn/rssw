@@ -507,7 +507,7 @@ std::vector< std::pair<size_t, double> > spw_order(std::vector<spacedword> & Spw
     std::transform(IndexSort.begin(), IndexSort.end(), PosScr.begin(), [&SpwOrdMat](size_t & Idx){
         double Scr = std::accumulate(SpwOrdMat[Idx].begin(),SpwOrdMat[Idx].end(),0.0,[](double A, std::pair<int,int> & B){
             if(B.second > 0){
-                return A + (B.first/(double)B.second);    
+                return A + std::abs(B.first/(double)B.second);    
             }
             return A;
         });

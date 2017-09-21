@@ -257,10 +257,12 @@ std::vector<spacedhit> family_hit(sequence_family & Family, unsigned FamID, spac
                 double BlockScore = BucketStart->score();
                 unsigned MatchCount = 1;
                 for(auto BuckIt = BucketStart + 1; BuckIt < BucketIter; BuckIt++){
-                    if(BuckIt->fam_id() > (BuckIt-1)->fam_id()){
-                        BlockScore += BuckIt->score();
-                        MatchCount++;
-                    }
+                    // if(BuckIt->fam_id() > (BuckIt-1)->fam_id()){
+                    //     BlockScore += BuckIt->score();
+                    //     MatchCount++;
+                    // }
+                    BlockScore += BuckIt->score();
+                    MatchCount++;
                 }
                 if(MatchCount >= (unsigned)dsoptions::WordPerSeq && BlockScore >= dsoptions::HitThreshold){
                     unsigned short SeqOrf = 0;
