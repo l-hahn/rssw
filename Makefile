@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=-fopenmp -Wall -O3 -std=c++11 -g -fno-omit-frame-pointer -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -Wl,--no-as-needed -lprofiler -ltcmalloc -Wl,--as-needed #-parallel -xHost #-prof-gen -prof-dir=./  -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=1 
+CC=/usr/bin/g++
+CFLAGS=-fopenmp -Wall -O3 -std=c++11 # -g -fno-omit-frame-pointer -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -Wl,--no-as-needed -lprofiler -ltcmalloc -Wl,--as-needed #-parallel -xHost #-prof-gen -prof-dir=./  -funroll-loops -ftree-vectorize -ftree-vectorizer-verbose=1 
 
 BASESRC=src/alphabet.cpp src/sequencefamily.cpp src/spacedworddb.cpp src/rswset.cpp src/representspw.cpp src/familyscore.cpp src/sequence.cpp src/patternset.cpp src/spacedword.cpp src/pattern.cpp
 BASEHDR=src/alphabet.hpp src/sequencefamily.hpp src/spacedworddb.hpp src/rswset.hpp src/representspw.hpp src/familyscore.hpp src/sequence.hpp src/patternset.hpp src/spacedword.hpp src/pattern.hpp
